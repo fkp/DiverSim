@@ -1,7 +1,6 @@
 public class HaldaneCompartment
 {
    /*****************************************************************
-   * Fraser Kirkpatrick 30/01/2004
    * Class which contains information about a tissue compartment
    *****************************************************************/
 
