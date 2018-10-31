@@ -1,7 +1,6 @@
 public class Bubble
 {
    /*****************************************************************
-   * Fraser Kirkpatrick 06/02/2004
    * Class which holds a bubble to display on the diversim gui
    *****************************************************************/
    public int x_coord;

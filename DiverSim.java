@@ -5,7 +5,6 @@ import java.awt.event.*;
 public class DiverSim extends Applet implements Runnable
 {
    /*****************************************************************
-   * Fraser Kirkpatrick 01/02/2004
    * Main applet class which displays the graphical decompression
    * model
    *****************************************************************/
@@ -381,6 +380,7 @@ public class DiverSim extends Applet implements Runnable
 
       // Using the KEY_TYPED constant here only fires for keys which actually
       // represent letters so to get the arrow  keys we need KEY_PRESSED
+      System.out.println("key:"+event.getID());
       if (event.getID() == KeyEvent.KEY_PRESSED)
       {
          key_code = event.getKeyCode();

@@ -1,7 +1,6 @@
 public class Compartment
 {
    /*****************************************************************
-   * Fraser Kirkpatrick 30/01/2004
    * Class which holds public variables containing tissue data
    *****************************************************************/
    public double pp_nitrogen;

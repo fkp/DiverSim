@@ -1,7 +1,6 @@
 public class Model
 {
    /*****************************************************************
-   * Fraser Kirkpatrick 30/01/2004
    * Class which implements a decompression model.
    *****************************************************************/
 
