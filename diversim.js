@@ -141,7 +141,7 @@ var maxDepth = 40;
 var minDepth = 0;
 var halftimes = [5,10,20,40,75];
 var atmosphericPressure = 1;
-var minutesPerClick = .25;
+var minutesPerClick = 1;
 
 // Current state
 var diveDepth = 0;
