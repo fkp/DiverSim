@@ -39,10 +39,21 @@ function Bubble (x, y, radius, xIncrement, yIncrement, sizeIncrement, colour)
 	}
 }
 
-function Compartment (ppNitrogen, halftime)
+function GraphParams (minX, maxX, minY, maxY, minGraphValue, maxGraphValue)
+{
+	this.minX = minX;
+	this.minY = minY;
+	this.maxX = maxX;
+	this.maxY = maxY;
+	this.minGraphValue = minGraphValue;
+	this.maxGraphValue = maxGraphValue;
+}
+
+function Compartment (ppNitrogen, halftime, graphParams)
 {
 	this.ppNitrogen = ppNitrogen;
 	this.halftime = halftime;
+	this.graphParams = graphParams;
 
 	this.updateNitrogen = function(pp, time)
 	{
@@ -66,7 +77,22 @@ function Compartment (ppNitrogen, halftime)
 		* tissue. Therefore ascertain whether or not this applies to this
 		* tissue.
 		*/		
-		this.bubbles = (this.ppNitrogen > (pp * 2));
+		this.bubbles = (this.ppNitrogen > (pp * 2));		
+	}
+	
+	this.draw = function()
+	{
+		var percent = this.ppNitrogen / (this.graphParams.maxGraphValue - this.graphParams.minGraphValue);
+		
+		if (this.bubbles)
+			c.fillStyle = 'rgba(255,0,0,0.5)';
+		else
+			c.fillStyle = 'rgba(0,0,255,0.5)';
+		
+		c.fillRect(this.graphParams.minX,
+			this.graphParams.minY,
+			this.graphParams.maxX - this.graphParams.minX,
+			(this.graphParams.maxY - this.graphParams.minY) * percent);
 	}
 	
 	this.textDescription = function()
@@ -78,17 +104,29 @@ function Compartment (ppNitrogen, halftime)
 	}
 }
 
-function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPress, gasNitrogenFraction)
+function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPress, gasNitrogenFraction, graphParams)
 {
 	this.unitsDepthPerAtmos = unitsDepthPerAtmos;
 	this.gasNitrogenFraction = gasNitrogenFraction;
 	this.lastAmbPressure = startingAmbPress;
 	this.lastDiveTime = 0;
+	this.graphBuffer = 10;
+	
+	// How much space to increment each graph by
+	var graphSpace = (graphParams.maxX - graphParams.minX / halftimes.length);
 	
 	this.compartments = [];
 	for (var i =0; i < halftimes.length; i++)
 	{
-		this.compartments.push(new Compartment(surfacePPNitrogen, halftimes[i]));
+		var comparmentParams = new GraphParams
+			(graphParams.minX + graphSpace*i,
+			graphParams.minX + graphSpace*(i+1) - this.graphBuffer,
+			graphParams.minY,
+			graphParams.maxY,
+			graphParams.minGraphValue,
+			graphParams.maxGraphValue);
+		
+		this.compartments.push(new Compartment(surfacePPNitrogen, halftimes[i], comparmentParams));
 	}
 
 	this.processSample = function(newDepth, newTime)
@@ -122,6 +160,15 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 		return this.lastAmbPressure * gasNitrogenFraction;
 	}
 	
+	this.draw = function()
+	{
+		// Ask the compartments to udpate their nitrogen levels
+		for (var i=0; i<this.compartments.length; i++)
+		{
+			this.compartments[i].draw();
+		}
+	}
+	
 	this.textDescription = function()
 	{
 		var result = "Nit Pressure: " + this.getAmbientNitrogenPP() + ", [";
@@ -141,23 +188,23 @@ var maxDepth = 40;
 var minDepth = 0;
 var halftimes = [5,10,20,40,75];
 var atmosphericPressure = 1;
-var minutesPerClick = 1;
+var minutesPerUpdate = 1;
 
 // Current state
 var diveDepth = 0;
 var diveTime = 0;
 
-var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction);
+var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams(300, 100, 200, 300, 0, 5));
 
 // Update the model every half second
-var myVar = setInterval(updateModel, 1000);
+var myVar = setInterval(updateModel, 100);
 
 function updateModel()
 {
 	model.processSample(diveDepth, diveTime);
-	diveTime+=minutesPerClick;
+	diveTime+=minutesPerUpdate;
 	
-	console.log("Dive time: " + diveTime + ", depth: " + diveDepth + " " + model.textDescription());
+	//console.log("Dive time: " + diveTime + ", depth: " + diveDepth + " " + model.textDescription());
 }
 
 
@@ -167,10 +214,11 @@ function animate()
 	requestAnimationFrame(animate);
 	
 	// Animate stuff
-	
+	c.clearRect(0,0,canvas.width, canvas.height);
+
+	model.draw();
 	
 
-	//c.clearRect(0,0,innerWidth, innerHeight);
 	
 	//for (var i=0; i<objectsArray.length; i++)
 	//{
@@ -181,12 +229,12 @@ function animate()
 
 function moveUp()
 {
-	diveDepth--;
+	diveDepth-=5;
 }
 
 function moveDown()
 {
-	diveDepth++;
+	diveDepth+=5;
 }
 
 animate();
