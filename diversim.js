@@ -1,6 +1,6 @@
 var canvas = document.querySelector('canvas');
 
-canvas.width = 800;
+canvas.width = 600;
 canvas.height = 500;
 
 var c = canvas.getContext('2d');
@@ -39,12 +39,12 @@ function Bubble (x, y, radius, xIncrement, yIncrement, sizeIncrement, colour)
 	}
 }
 
-function GraphParams (minX, maxX, minY, maxY, minGraphValue, maxGraphValue)
+function GraphParams (x, y, width, height, minGraphValue, maxGraphValue)
 {
-	this.minX = minX;
-	this.minY = minY;
-	this.maxX = maxX;
-	this.maxY = maxY;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
 	this.minGraphValue = minGraphValue;
 	this.maxGraphValue = maxGraphValue;
 }
@@ -88,11 +88,13 @@ function Compartment (ppNitrogen, halftime, graphParams)
 			c.fillStyle = 'rgba(255,0,0,0.5)';
 		else
 			c.fillStyle = 'rgba(0,0,255,0.5)';
-		
-		c.fillRect(this.graphParams.minX,
-			this.graphParams.minY,
-			this.graphParams.maxX - this.graphParams.minX,
-			(this.graphParams.maxY - this.graphParams.minY) * percent);
+
+		c.fillRect(this.graphParams.x,
+			this.graphParams.y,
+			this.graphParams.width,
+			-this.graphParams.height * percent);
+
+		//c.fillText(-this.graphParams.height * percent,graphParams.X,graphParams.Y)
 	}
 	
 	this.textDescription = function()
@@ -113,20 +115,20 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	this.graphBuffer = 10;
 	
 	// How much space to increment each graph by
-	var graphSpace = (graphParams.maxX - graphParams.minX / halftimes.length);
+	var graphSpace = (graphParams.width / halftimes.length);
 	
 	this.compartments = [];
 	for (var i =0; i < halftimes.length; i++)
 	{
-		var comparmentParams = new GraphParams
-			(graphParams.minX + graphSpace*i,
-			graphParams.minX + graphSpace*(i+1) - this.graphBuffer,
-			graphParams.minY,
-			graphParams.maxY,
+		var compartmentParams = new GraphParams
+			(graphParams.x + graphSpace*i,
+			graphParams.y,
+			graphSpace - this.graphBuffer,
+			graphParams.height,
 			graphParams.minGraphValue,
 			graphParams.maxGraphValue);
 		
-		this.compartments.push(new Compartment(surfacePPNitrogen, halftimes[i], comparmentParams));
+		this.compartments.push(new Compartment(surfacePPNitrogen, halftimes[i], compartmentParams));
 	}
 
 	this.processSample = function(newDepth, newTime)
@@ -162,7 +164,7 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	
 	this.draw = function()
 	{
-		// Ask the compartments to udpate their nitrogen levels
+		// Ask the compartments to update their nitrogen levels
 		for (var i=0; i<this.compartments.length; i++)
 		{
 			this.compartments[i].draw();
@@ -194,7 +196,16 @@ var minutesPerUpdate = 1;
 var diveDepth = 0;
 var diveTime = 0;
 
-var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams(300, 100, 200, 300, 0, 5));
+// Graphics
+var border = 20;
+
+var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams
+	(border,  	// X
+	canvas.height - border,	// Y
+    canvas.width - border,	// width
+	canvas.height,	// height
+	0,		// minGraphValue
+	4));	// maxGraphValue
 
 // Update the model every half second
 var myVar = setInterval(updateModel, 100);
@@ -207,8 +218,6 @@ function updateModel()
 	//console.log("Dive time: " + diveTime + ", depth: " + diveDepth + " " + model.textDescription());
 }
 
-
-
 function animate()
 {
 	requestAnimationFrame(animate);
@@ -217,14 +226,6 @@ function animate()
 	c.clearRect(0,0,canvas.width, canvas.height);
 
 	model.draw();
-	
-
-	
-	//for (var i=0; i<objectsArray.length; i++)
-	//{
-	//	objectsArray[i].update();
-	//}
-	
 }
 
 function moveUp()
