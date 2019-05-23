@@ -147,7 +147,7 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 		// Work out the length of tie for the period we are sampling
 		var sampleLength = newTime - this.lastDiveTime;
 		
-		// Ask the compartments to udpate their nitrogen levels
+		// Ask the compartments to update their nitrogen levels
 		for (var i=0; i<this.compartments.length; i++)
 		{
 			this.compartments[i].updateNitrogen(avNitroPP,sampleLength);
@@ -167,7 +167,7 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	
 	this.draw = function()
 	{
-		// Ask the compartments to update their nitrogen levels
+		// Ask the compartments to redraw
 		for (var i=0; i<this.compartments.length; i++)
 		{
 			this.compartments[i].draw();
