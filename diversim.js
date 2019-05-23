@@ -113,6 +113,8 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	this.lastAmbPressure = startingAmbPress;
 	this.lastDiveTime = 0;
 	this.graphBuffer = 10;
+	this.depth = 0;
+	this.graphParams = graphParams;
 	
 	// How much space to increment each graph by
 	var graphSpace = (graphParams.width / halftimes.length);
@@ -153,6 +155,7 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 		
 		// Store the last values so we can reference them the next time we update
 		this.lastAmbPressure = newAmbPress;
+		this.depth = newDepth;
 		this.lastDiveTime = newTime;
 	}
 	
@@ -169,6 +172,9 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 		{
 			this.compartments[i].draw();
 		}
+
+        c.fillStyle = 'rgba(0,0,0,0.5)';
+		c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParams.x,this.graphParams.y)
 	}
 	
 	this.textDescription = function()
