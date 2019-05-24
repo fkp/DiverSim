@@ -139,7 +139,7 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 
 	// How much space to increment each graph by
 	var graphSpace = (this.graphParamsPane.width / halftimes.length) + (this.graphBuffer / halftimes.length);
-	
+
 	this.compartments = [];
 	for (var i =0; i < halftimes.length; i++)
 	{
@@ -194,12 +194,26 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 			this.compartments[i].draw();
 		}
 
+        // Outlines of the graph and diver panes
         c.fillStyle = 'rgba(0,0,0)';
         c.rect(this.graphParamsPane.x, this.graphParamsPane.y, this.graphParamsPane.width, this.graphParamsPane.height - border);
         c.stroke();
         c.rect(this.graphParamsDiver.x, this.graphParamsDiver.y, this.graphParamsDiver.width, this.graphParamsDiver.height - border);
         c.stroke();
-        c.fillText(this.graphParamsPane.x + " " + this.graphParamsPane.y + " " + this.graphParamsPane.width + " " + this.graphParamsPane.height, this.graphParamsPane.x,this.graphParamsPane.y -border);
+
+        // Draw where the ambient pressure is
+        var paneHeight = this.graphParamsPane.y + this.graphParamsPane.height
+        var yCoord = paneHeight - (paneHeight * (this.getAmbientNitrogenPP() / (this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue)));
+
+        //this.getAmbientNitrogenPP() / this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue + this.graphParamsPane.y;
+
+        c.beginPath();
+        c.moveTo(this.graphParamsPane.x, yCoord);
+        c.lineTo(this.graphParamsPane.x+this.graphParamsPane.width, yCoord);
+        c.stroke();
+
+        //c.fillText(this.graphParamsPane.x + " " + this.graphParamsPane.y + " " + this.graphParamsPane.width + " " + this.graphParamsPane.height, this.graphParamsPane.x,this.graphParamsPane.y +border);
+        //c.fillText(this.getAmbientNitrogenPP() + " " + yCoord, this.graphParamsPane.x,this.graphParamsPane.y +border*2);
         c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParamsPane.x,this.graphParamsPane.y);
 	}
 	
