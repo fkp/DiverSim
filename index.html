@@ -1,14 +1,22 @@
-<HTML>
-<HEAD>
-  <TITLE>DiverSim</TITLE>
-  <META NAME="keywords"
-   CONTENT="haldane decompression, diving">
-  <META NAME="description"
-   CONTENT="Graphical simulation of the original Haldane decompression model">
-</HEAD>
-<BODY>
-<CENTER>
-<APPLET CODE="DiverSim.class" WIDTH=300 HEIGHT=400></APPLET>
-</CENTER>
-</BODY>
-</HTML>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="UTF-8">
+	<title>Diver Simulation</title>
+	<style type="text/css">
+		canvas {
+			border: 2px solid black;
+		}
+		
+		body {
+			margin: 0;
+			}
+	</style>
+  </head>
+  <body>
+	<button onclick="moveUp()">Up</button>
+	<button onclick="moveDown()">Down</button>
+	<canvas></canvas>
+	<script src="diversim.js"></script>
+  </body>
+</html>
