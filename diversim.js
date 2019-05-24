@@ -90,11 +90,12 @@ function Compartment (ppNitrogen, halftime, graphParams)
 			c.fillStyle = 'rgba(0,0,255,0.5)';
 
 		c.fillRect(this.graphParams.x,
-			this.graphParams.y,
+			this.graphParams.y + this.graphParams.height,
 			this.graphParams.width,
 			-this.graphParams.height * percent);
 
-		//c.fillText(-this.graphParams.height * percent,graphParams.X,graphParams.Y)
+        c.fillStyle = 'rgba(0,0,0)';
+		c.fillText(this.ppNitrogen.toFixed(3), this.graphParams.x + border, this.graphParams.height - this.graphParams.height*percent)
 	}
 	
 	this.textDescription = function()
@@ -112,23 +113,43 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	this.gasNitrogenFraction = gasNitrogenFraction;
 	this.lastAmbPressure = startingAmbPress;
 	this.lastDiveTime = 0;
-	this.graphBuffer = 10;
+
+	// Spaces between compartment bars
+	this.graphBuffer = border * 2;
 	this.depth = 0;
-	this.graphParams = graphParams;
+
+	// How to divide the screen between the compartments and the diver display
+	this.divider = 2;
+
+	this.graphParamsPane = new GraphParams
+	    (graphParams.x,
+	    graphParams.y,
+	    graphParams.width / this.divider,
+	    graphParams.height,
+	    graphParams.minGraphValue,
+	    graphParams.maxGraphValue);
 	
+	this.graphParamsDiver = new GraphParams
+	    (graphParams.x + graphParams.width / this.divider,
+	    graphParams.y,
+	    graphParams.width / this.divider,
+	    graphParams.height,
+	    graphParams.minGraphValue,
+	    graphParams.maxGraphValue);
+
 	// How much space to increment each graph by
-	var graphSpace = (graphParams.width / halftimes.length);
+	var graphSpace = (this.graphParamsPane.width / halftimes.length) + (this.graphBuffer / halftimes.length);
 	
 	this.compartments = [];
 	for (var i =0; i < halftimes.length; i++)
 	{
 		var compartmentParams = new GraphParams
-			(graphParams.x + graphSpace*i,
-			graphParams.y,
+			(this.graphParamsPane.x + graphSpace*i,
+			this.graphParamsPane.y,
 			graphSpace - this.graphBuffer,
-			graphParams.height,
-			graphParams.minGraphValue,
-			graphParams.maxGraphValue);
+			this.graphParamsPane.height - border,
+			this.graphParamsPane.minGraphValue,
+			this.graphParamsPane.maxGraphValue);
 		
 		this.compartments.push(new Compartment(surfacePPNitrogen, halftimes[i], compartmentParams));
 	}
@@ -173,8 +194,13 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 			this.compartments[i].draw();
 		}
 
-        c.fillStyle = 'rgba(0,0,0,0.5)';
-		c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParams.x,this.graphParams.y)
+        c.fillStyle = 'rgba(0,0,0)';
+        c.rect(this.graphParamsPane.x, this.graphParamsPane.y, this.graphParamsPane.width, this.graphParamsPane.height - border);
+        c.stroke();
+        c.rect(this.graphParamsDiver.x, this.graphParamsDiver.y, this.graphParamsDiver.width, this.graphParamsDiver.height - border);
+        c.stroke();
+        c.fillText(this.graphParamsPane.x + " " + this.graphParamsPane.y + " " + this.graphParamsPane.width + " " + this.graphParamsPane.height, this.graphParamsPane.x,this.graphParamsPane.y -border);
+        c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParamsPane.x,this.graphParamsPane.y);
 	}
 	
 	this.textDescription = function()
@@ -203,13 +229,13 @@ var diveDepth = 0;
 var diveTime = 0;
 
 // Graphics
-var border = 20;
+var border = 10;
 
 var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams
 	(border,  	// X
-	canvas.height - border,	// Y
-    canvas.width - border,	// width
-	canvas.height,	// height
+	border,	// Y
+    canvas.width - border*2,	// width
+	canvas.height - border,	// height
 	0,		// minGraphValue
 	4));	// maxGraphValue
 
