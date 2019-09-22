@@ -139,16 +139,13 @@ function Compartment (ppNitrogen, halftime, graphParams)
             this.graphParams.width,
             -this.graphParams.height * percent).endFill();
 
-        this.ppReadingText.text = this.ppNitrogen.toFixed(3);
+        this.ppReadingText.text = this.textDescription();
         this.ppReadingText.y = this.graphParams.height - this.graphParams.height*percent;
 	}
 	
 	this.textDescription = function()
 	{
-		if (this.bubbles)
-			return "!" + this.ppNitrogen + "!";
-		else
-			return this.ppNitrogen;
+		return this.ppNitrogen.toFixed(3);
 	}
 }
 
@@ -165,6 +162,11 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 
 	// How to divide the screen between the compartments and the diver display
 	this.divider = 2;
+
+	this.panel1;
+	this.panel2;
+	this.ambientLine;
+	this.modelText;
 
 	this.graphParamsPane = new GraphParams
 	    (graphParams.x,
@@ -202,27 +204,19 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	}
 
     // Outlines of the graph and diver panes
-    //c.fillStyle = 'rgba(0,0,0)';
-    var panel1 = new createjs.Shape();
-    panel1.graphics.drawRect(this.graphParamsPane.x, this.graphParamsPane.y, this.graphParamsPane.width, this.graphParamsPane.height - border);
-    var panel2 = new createjs.Shape();
-    panel2.graphics.drawRect(this.graphParamsDiver.x, this.graphParamsDiver.y, this.graphParamsDiver.width, this.graphParamsDiver.height - border);
-    stage.addChild(panel1);
-    stage.addChild(panel2);
+    this.panel1 = new createjs.Shape();
+    this.panel2 = new createjs.Shape();
+    stage.addChild(this.panel1);
+    stage.addChild(this.panel2);
 
-/*    var paneHeight = this.graphParamsPane.y + this.graphParamsPane.height
-    var yCoord = paneHeight - (paneHeight * (this.getAmbientNitrogenPP() / (this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue)));
+    // The ambient pressure
+    this.ambientLine = new createjs.Shape();
+    stage.addChild(this.ambientLine);
 
-    //this.getAmbientNitrogenPP() / this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue + this.graphParamsPane.y;
-
-    c.beginPath();
-    c.moveTo(this.graphParamsPane.x, yCoord);
-    c.lineTo(this.graphParamsPane.x+this.graphParamsPane.width, yCoord);
-    c.stroke();*/
-
-    //c.fillText(this.graphParamsPane.x + " " + this.graphParamsPane.y + " " + this.graphParamsPane.width + " " + this.graphParamsPane.height, this.graphParamsPane.x,this.graphParamsPane.y +border);
-    //c.fillText(this.getAmbientNitrogenPP() + " " + yCoord, this.graphParamsPane.x,this.graphParamsPane.y +border*2);
-    c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParamsPane.x,this.graphParamsPane.y);
+    this.modelText = new createjs.Text("Depth: " + this.depth + ", Time: " + this.lastDiveTime);
+    this.modelText.x = this.graphParamsPane.x;
+    this.modelText.y = this.graphParamsPane.y;
+    stage.addChild(this.modelText);
 
 	this.processSample = function(newDepth, newTime)
 	{
@@ -258,6 +252,18 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	
 	this.update = function()
 	{
+	    // Update the model text
+	    this.modelText.text = "Depth: " + this.depth + ", Time: " + this.lastDiveTime;
+
+        // Outlines of the graph and diver panes
+    	this.panel1.graphics.clear().beginStroke("rgba(255,0,0,0.5)").drawRect(this.graphParamsPane.x, this.graphParamsPane.y, this.graphParamsPane.width, this.graphParamsPane.height - border);
+        this.panel2.graphics.clear().beginStroke("rgba(255,0,0,0.5)").drawRect(this.graphParamsDiver.x, this.graphParamsDiver.y, this.graphParamsDiver.width, this.graphParamsDiver.height - border);
+
+        // Draw where the ambient pressure is
+        var paneHeight = this.graphParamsPane.y + this.graphParamsPane.height;
+        var yCoord = paneHeight - (paneHeight * (this.getAmbientNitrogenPP() / (this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue)));
+        this.ambientLine.graphics.clear().beginStroke("rgba(0,255,0,0.5)").drawRect(this.graphParamsPane.x, yCoord, this.graphParamsPane.width, 1);
+
 		// Ask the compartments to redraw
 		for (var i=0; i<this.compartments.length; i++)
 		{
@@ -267,33 +273,6 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 
 	this.draw = function()
 	{
-		// Ask the compartments to redraw
-		for (var i=0; i<this.compartments.length; i++)
-		{
-			this.compartments[i].draw();
-		}
-
-        // Outlines of the graph and diver panes
-        c.fillStyle = 'rgba(0,0,0)';
-        c.rect(this.graphParamsPane.x, this.graphParamsPane.y, this.graphParamsPane.width, this.graphParamsPane.height - border);
-        c.stroke();
-        c.rect(this.graphParamsDiver.x, this.graphParamsDiver.y, this.graphParamsDiver.width, this.graphParamsDiver.height - border);
-        c.stroke();
-
-        // Draw where the ambient pressure is
-        var paneHeight = this.graphParamsPane.y + this.graphParamsPane.height
-        var yCoord = paneHeight - (paneHeight * (this.getAmbientNitrogenPP() / (this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue)));
-
-        //this.getAmbientNitrogenPP() / this.graphParamsPane.maxGraphValue - this.graphParamsPane.minGraphValue + this.graphParamsPane.y;
-
-        c.beginPath();
-        c.moveTo(this.graphParamsPane.x, yCoord);
-        c.lineTo(this.graphParamsPane.x+this.graphParamsPane.width, yCoord);
-        c.stroke();
-
-        //c.fillText(this.graphParamsPane.x + " " + this.graphParamsPane.y + " " + this.graphParamsPane.width + " " + this.graphParamsPane.height, this.graphParamsPane.x,this.graphParamsPane.y +border);
-        //c.fillText(this.getAmbientNitrogenPP() + " " + yCoord, this.graphParamsPane.x,this.graphParamsPane.y +border*2);
-        c.fillText("Depth: " + this.depth + ", Time: " + this.lastDiveTime,this.graphParamsPane.x,this.graphParamsPane.y);
 	}
 	
 	this.textDescription = function()
@@ -325,12 +304,12 @@ var diveTime = 0;
 var border = 10;
 
 var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams
-	(border,  	// X
-	border,	// Y
+	(border,  	                // X
+	border,	                    // Y
     canvas.width - border*2,	// width
-	canvas.height - border,	// height
-	0,		// minGraphValue
-	4));	// maxGraphValue
+	canvas.height - border,	    // height
+	0,		                    // minGraphValue
+	4));	                    // maxGraphValue
 
 // Update the model every half second
 var myVar = setInterval(updateModel, 100);
@@ -339,19 +318,10 @@ function updateModel()
 {
 	model.processSample(diveDepth, diveTime);
 	diveTime+=minutesPerUpdate;
-	
-	//console.log("Dive time: " + diveTime + ", depth: " + diveDepth + " " + model.textDescription());
 }
 
 function tick(event)
 {
-	//requestAnimationFrame(animate);
-	
-	// Animate stuff
-	//c.clearRect(0,0,canvas.width, canvas.height);
-
-//console.log("fktemp");
-
 	model.update();
 	stage.update(event);
 }
@@ -370,4 +340,3 @@ function moveDown()
 createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 createjs.Ticker.framerate = 30;
 createjs.Ticker.on("tick", tick);
-//animate();
