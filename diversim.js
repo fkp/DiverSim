@@ -13,25 +13,25 @@ createjs.Touch.enable(stage);
 
 stage.mouseMoveOutside = true;
 
-var circle = new createjs.Shape();
-circle.graphics.beginFill("red").drawCircle(0, 0, 50);
-
-var label = new createjs.Text("drag me", "bold 14px Arial", "#FFFFFF");
-label.textAlign = "center";
-label.y = -7;
+var diver = new createjs.Bitmap("icons8-scuba-mask-96.png");
+diver.x = -(canvas.width /6);
+diver.y = -50;
 
 var dragger = new createjs.Container();
 dragger.x = 500;
 dragger.y = 100;
-dragger.addChild(circle, label);
+dragger.setBounds(0, 0, 100, 100);
+dragger.addChild(diver);
 stage.addChild(dragger);
 
-dragger.on("pressmove",function(evt) {
-    // currentTarget will be the container that the event listener was added to:
-    //evt.currentTarget.x = evt.stageX;
-    evt.currentTarget.y = evt.stageY;
-    // make sure to redraw the stage to show the change:
-    stage.update();
+dragger.on("pressmove",function(evt)
+{
+    if (evt.stageY >= 100  && evt.stageY <= canvas.height - 100)
+    {
+        evt.currentTarget.y = evt.stageY;
+        // make sure to redraw the stage to show the change:
+        stage.update();
+    }
 });
 
 stage.update();
