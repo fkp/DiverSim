@@ -1,11 +1,27 @@
 var canvas = document.querySelector('canvas');
-
 canvas.width = 600;
 canvas.height = 500;
-
 var c = canvas.getContext('2d');
-
 var stage, output;
+
+// Model constants
+var surfacePPNitrogen = 0.79;
+var unitsDepthPerAtmosphere = 10;
+var gasNitrogenFraction = .79;
+var startingAmbPress = 1;
+var maxDepth = 40;
+var minDepth = 0;
+var halftimes = [5,10,20,40,75];
+var atmosphericPressure = 1;
+var minutesPerUpdate = 1;
+
+// Current state
+var diveDepth = 0;
+var diveTime = 0;
+
+// Graphics
+var border = 10;
+
 
 stage = new createjs.Stage("diverCanvas");
 // For mobile devices.
@@ -20,16 +36,18 @@ diver.y = -50;
 var dragger = new createjs.Container();
 dragger.x = 500;
 dragger.y = 100;
-dragger.setBounds(0, 0, 100, 100);
 dragger.addChild(diver);
 stage.addChild(dragger);
 
+var dragMultiplier = (maxDepth-minDepth) / ((canvas.height-30)-100);
+
 dragger.on("pressmove",function(evt)
 {
-    if (evt.stageY >= 100  && evt.stageY <= canvas.height - 100)
+    if (evt.stageY >= 100  && evt.stageY <= canvas.height - 30)
     {
+        // Update the dragger height and the depth in our model
         evt.currentTarget.y = evt.stageY;
-        // make sure to redraw the stage to show the change:
+        diveDepth=Math.round((evt.stageY-100) * dragMultiplier);
         stage.update();
     }
 });
@@ -285,24 +303,6 @@ function Model(surfacePPNitrogen, unitsDepthPerAtmos, halftimes, startingAmbPres
 	}
 }
 
-// Model constants
-var surfacePPNitrogen = 0.79;
-var unitsDepthPerAtmosphere = 10;
-var gasNitrogenFraction = .79;
-var startingAmbPress = 1;
-var maxDepth = 40;
-var minDepth = 0;
-var halftimes = [5,10,20,40,75];
-var atmosphericPressure = 1;
-var minutesPerUpdate = 1;
-
-// Current state
-var diveDepth = 0;
-var diveTime = 0;
-
-// Graphics
-var border = 10;
-
 var model = new Model(surfacePPNitrogen, unitsDepthPerAtmosphere, halftimes, startingAmbPress, gasNitrogenFraction, new GraphParams
 	(border,  	                // X
 	border,	                    // Y
@@ -325,17 +325,6 @@ function tick(event)
 	model.update();
 	stage.update(event);
 }
-
-function moveUp()
-{
-	diveDepth-=5;
-}
-
-function moveDown()
-{
-	diveDepth+=5;
-}
-
 
 createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 createjs.Ticker.framerate = 30;
